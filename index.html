@@ -415,7 +415,7 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <script>
-const SHEET_URL = 'https://script.google.com/macros/s/AKfycbzY6g69f0Fn896iqqzW_c0qf4YkADHOeLbfWjmPeSiH2KzoUV_llGXs_l2jydgpLwyUGw/exec';
+const SHEET_URL = 'https://script.google.com/macros/s/AKfycbzjNPxZjZrR_-nH_qIMYWaEdfIkOc6sqPk3509ZtW97TTS31oJNmQT3tMII66f7O3_oZA/exec';
 
 let cachedData = [];
 let lineChartInst = null;
@@ -434,10 +434,8 @@ function init() {
 
 async function testConnection() {
   try {
-    const r = await fetch(SHEET_URL, { method: 'GET' });
-    const data = await r.json();
-    if(data.status === 'ok') setStatus('connected', 'متصل بـ Google Sheets');
-    else setStatus('error', 'تعذّر الاتصال');
+    await fetch(SHEET_URL, { method: 'GET', mode: 'no-cors' });
+    setStatus('connected', 'متصل بـ Google Sheets');
   } catch(e) {
     setStatus('error', 'تعذّر الاتصال');
   }
@@ -473,11 +471,10 @@ async function submitEntry() {
   btn.textContent = 'جاري الحفظ...';
 
   try {
-    await fetch(SHEET_URL, {
-      method: 'POST',
-      mode: 'cors',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ day, time, cat, act, level })
+    const params = new URLSearchParams({ day, time, cat, act, level: level.toString() });
+    await fetch(SHEET_URL + '?' + params.toString(), {
+      method: 'GET',
+      mode: 'no-cors'
     });
 
     // Add to local cache
