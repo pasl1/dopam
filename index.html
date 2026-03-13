@@ -415,7 +415,7 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <script>
-const SHEET_URL = 'https://script.google.com/macros/s/AKfycbxw4MtP9u-PgxT87VVcMkoqqixU6E4hIH1ru247sEqQUD5gVEiPEgHj2wiQbk-k0t5kcw/exec';
+const SHEET_URL = 'https://script.google.com/macros/s/AKfycbzY6g69f0Fn896iqqzW_c0qf4YkADHOeLbfWjmPeSiH2KzoUV_llGXs_l2jydgpLwyUGw/exec';
 
 let cachedData = [];
 let lineChartInst = null;
@@ -434,8 +434,10 @@ function init() {
 
 async function testConnection() {
   try {
-    const r = await fetch(SHEET_URL + '?action=ping', { method: 'GET', mode: 'no-cors' });
-    setStatus('connected', 'متصل بـ Google Sheets');
+    const r = await fetch(SHEET_URL, { method: 'GET' });
+    const data = await r.json();
+    if(data.status === 'ok') setStatus('connected', 'متصل بـ Google Sheets');
+    else setStatus('error', 'تعذّر الاتصال');
   } catch(e) {
     setStatus('error', 'تعذّر الاتصال');
   }
@@ -473,7 +475,7 @@ async function submitEntry() {
   try {
     await fetch(SHEET_URL, {
       method: 'POST',
-      mode: 'no-cors',
+      mode: 'cors',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ day, time, cat, act, level })
     });
