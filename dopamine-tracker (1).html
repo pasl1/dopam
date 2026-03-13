@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="theme-color" content="#0a0a0f">
+<title>تراكر الدوبامين</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --surface: #13131a;
+    --surface2: #1c1c26;
+    --border: rgba(255,255,255,0.08);
+    --border2: rgba(255,255,255,0.14);
+    --text: #f0f0f5;
+    --muted: #888899;
+    --accent: #6c8fff;
+    --accent2: #4a6ef5;
+    --green: #3dd68c;
+    --amber: #f5a623;
+    --red: #ff5f5f;
+    --radius: 14px;
+    --radius-sm: 8px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  body {
+    font-family: 'IBM Plex Sans Arabic', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    max-width: 430px;
+    margin: 0 auto;
+    padding-bottom: 100px;
+  }
+
+  /* Header */
+  .header {
+    padding: 52px 20px 20px;
+    position: relative;
+  }
+  .header-label {
+    font-size: 11px;
+    letter-spacing: 2px;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 6px;
+    font-weight: 500;
+  }
+  .header h1 {
+    font-size: 26px;
+    font-weight: 600;
+    color: var(--text);
+    line-height: 1.2;
+  }
+  .header-date {
+    font-size: 13px;
+    color: var(--muted);
+    margin-top: 6px;
+  }
+
+  /* Status bar */
+  .status-bar {
+    margin: 0 20px 20px;
+    background: var(--surface);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 13px;
+  }
+  .status-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--muted);
+    flex-shrink: 0;
+  }
+  .status-dot.connected { background: var(--green); box-shadow: 0 0 8px rgba(61,214,140,0.4); }
+  .status-dot.error { background: var(--red); }
+  .status-text { color: var(--muted); flex: 1; }
+
+  /* Tabs */
+  .tabs {
+    display: flex;
+    gap: 6px;
+    padding: 0 20px;
+    margin-bottom: 20px;
+  }
+  .tab {
+    flex: 1;
+    padding: 10px 8px;
+    border-radius: var(--radius-sm);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    border: 0.5px solid var(--border);
+    background: var(--surface);
+    color: var(--muted);
+    font-family: 'IBM Plex Sans Arabic', sans-serif;
+    transition: all 0.18s;
+    text-align: center;
+  }
+  .tab.active {
+    background: var(--accent2);
+    border-color: transparent;
+    color: #fff;
+  }
+
+  /* Form */
+  .section {
+    margin: 0 20px 16px;
+    background: var(--surface);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius);
+    padding: 18px;
+  }
+  .section-title {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--muted);
+    margin-bottom: 14px;
+    letter-spacing: 0.5px;
+  }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
+  .form-group { display: flex; flex-direction: column; gap: 6px; }
+  .form-label { font-size: 11px; color: var(--muted); letter-spacing: 0.5px; }
+
+  select, input[type="time"], input[type="text"] {
+    background: var(--surface2);
+    border: 0.5px solid var(--border2);
+    border-radius: var(--radius-sm);
+    padding: 10px 12px;
+    font-size: 14px;
+    color: var(--text);
+    font-family: 'IBM Plex Sans Arabic', sans-serif;
+    width: 100%;
+    appearance: none;
+    -webkit-appearance: none;
+    outline: none;
+  }
+  select:focus, input:focus {
+    border-color: var(--accent);
+  }
+  option { background: #1c1c26; }
+
+  .slider-section { margin-bottom: 14px; }
+  .slider-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 10px; }
+  .slider-header .form-label { margin: 0; }
+  .level-display {
+    font-size: 28px;
+    font-weight: 600;
+    color: var(--accent);
+    line-height: 1;
+    transition: color 0.2s;
+  }
+
+  input[type="range"] {
+    width: 100%;
+    height: 4px;
+    border-radius: 2px;
+    background: var(--surface2);
+    outline: none;
+    border: none;
+    padding: 0;
+    -webkit-appearance: none;
+    cursor: pointer;
+  }
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    background: var(--accent);
+    cursor: pointer;
+    transition: transform 0.1s;
+  }
+  input[type="range"]::-webkit-slider-thumb:active { transform: scale(1.2); }
+  .slider-labels { display: flex; justify-content: space-between; margin-top: 6px; font-size: 10px; color: var(--muted); }
+
+  .btn-submit {
+    width: 100%;
+    padding: 14px;
+    background: var(--accent2);
+    border: none;
+    border-radius: var(--radius-sm);
+    color: #fff;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: 'IBM Plex Sans Arabic', sans-serif;
+    transition: all 0.18s;
+    position: relative;
+    overflow: hidden;
+  }
+  .btn-submit:active { transform: scale(0.98); opacity: 0.9; }
+  .btn-submit:disabled { opacity: 0.5; cursor: not-allowed; }
+  .btn-submit.loading::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
+    animation: shimmer 1.2s infinite;
+  }
+  @keyframes shimmer { from { transform: translateX(-100%); } to { transform: translateX(100%); } }
+
+  /* Chart tab */
+  .chart-wrap {
+    margin: 0 20px 16px;
+    background: var(--surface);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius);
+    padding: 18px;
+  }
+  .chart-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
+  .chart-title { font-size: 13px; font-weight: 500; color: var(--muted); }
+  .day-select {
+    font-size: 12px;
+    background: var(--surface2);
+    border: 0.5px solid var(--border2);
+    border-radius: var(--radius-sm);
+    padding: 6px 10px;
+    color: var(--text);
+    font-family: 'IBM Plex Sans Arabic', sans-serif;
+  }
+
+  .metrics { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 0 20px 16px; }
+  .metric {
+    background: var(--surface);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 14px 12px;
+  }
+  .metric-label { font-size: 10px; color: var(--muted); margin-bottom: 6px; letter-spacing: 0.3px; }
+  .metric-val { font-size: 22px; font-weight: 600; color: var(--text); }
+  .metric-sub { font-size: 10px; color: var(--muted); margin-top: 2px; }
+
+  canvas { display: block; }
+
+  /* Toast */
+  .toast {
+    position: fixed;
+    bottom: 90px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: var(--surface2);
+    border: 0.5px solid var(--border2);
+    border-radius: 30px;
+    padding: 10px 20px;
+    font-size: 13px;
+    color: var(--text);
+    opacity: 0;
+    transition: all 0.25s;
+    pointer-events: none;
+    white-space: nowrap;
+    z-index: 999;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  .toast.success { border-color: var(--green); color: var(--green); }
+  .toast.error { border-color: var(--red); color: var(--red); }
+
+  /* Bottom nav */
+  .bottom-nav {
+    position: fixed;
+    bottom: 0; left: 50%; transform: translateX(-50%);
+    width: 100%; max-width: 430px;
+    background: rgba(10,10,15,0.92);
+    backdrop-filter: blur(20px);
+    border-top: 0.5px solid var(--border);
+    display: flex;
+    padding: 10px 0 20px;
+  }
+  .nav-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    cursor: pointer;
+    padding: 6px;
+    color: var(--muted);
+    font-size: 10px;
+    border: none;
+    background: transparent;
+    font-family: 'IBM Plex Sans Arabic', sans-serif;
+    transition: color 0.18s;
+  }
+  .nav-item.active { color: var(--accent); }
+  .nav-icon { font-size: 20px; line-height: 1; }
+
+  .empty { text-align: center; padding: 40px 20px; color: var(--muted); font-size: 13px; line-height: 1.8; }
+
+  /* Loading overlay */
+  .screen { display: none; }
+  .screen.active { display: block; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-label">تراكر الدوبامين</div>
+  <h1 id="day-title">اليوم</h1>
+  <div class="header-date" id="date-display"></div>
+</div>
+
+<div class="status-bar">
+  <div class="status-dot" id="status-dot"></div>
+  <div class="status-text" id="status-text">جاري الاتصال بـ Google Sheets...</div>
+</div>
+
+<div class="bottom-nav">
+  <button class="nav-item active" onclick="switchNav('add')" id="nav-add">
+    <span class="nav-icon">＋</span>
+    <span>إضافة</span>
+  </button>
+  <button class="nav-item" onclick="switchNav('chart')" id="nav-chart">
+    <span class="nav-icon">〜</span>
+    <span>الخط البياني</span>
+  </button>
+  <button class="nav-item" onclick="switchNav('week')" id="nav-week">
+    <span class="nav-icon">▦</span>
+    <span>الأسبوع</span>
+  </button>
+</div>
+
+<!-- ADD SCREEN -->
+<div class="screen active" id="screen-add">
+  <div class="section">
+    <div class="section-title">سجّل لحظتك</div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">الوقت</label>
+        <input type="time" id="inp-time" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">التصنيف</label>
+        <select id="inp-cat">
+          <option value="طعام">طعام / شراب</option>
+          <option value="رياضة">رياضة / حركة</option>
+          <option value="تواصل">تواصل اجتماعي</option>
+          <option value="إنجاز">إنجاز / عمل</option>
+          <option value="ترفيه">ترفيه / محتوى</option>
+          <option value="طبيعة">طبيعة / هواء</option>
+          <option value="آخر">آخر</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group" style="margin-bottom:14px;">
+      <label class="form-label">النشاط</label>
+      <input type="text" id="inp-act" placeholder="مثال: قهوة الصباح، تمرين، لقاء صديق..." />
+    </div>
+    <div class="slider-section">
+      <div class="slider-header">
+        <label class="form-label">مستوى الإشباع</label>
+        <div class="level-display" id="level-display">5</div>
+      </div>
+      <input type="range" min="1" max="10" value="5" step="1" id="inp-level" oninput="onSlider(this.value)" />
+      <div class="slider-labels">
+        <span>منخفض</span>
+        <span>متوسط</span>
+        <span>مرتفع</span>
+      </div>
+    </div>
+    <button class="btn-submit" id="btn-add" onclick="submitEntry()">حفظ في Google Sheets ←</button>
+  </div>
+</div>
+
+<!-- CHART SCREEN -->
+<div class="screen" id="screen-chart">
+  <div class="metrics">
+    <div class="metric">
+      <div class="metric-label">متوسط اليوم</div>
+      <div class="metric-val" id="m-avg">—</div>
+      <div class="metric-sub">من 10</div>
+    </div>
+    <div class="metric">
+      <div class="metric-label">أعلى لحظة</div>
+      <div class="metric-val" id="m-peak">—</div>
+      <div class="metric-sub" id="m-peak-lbl">—</div>
+    </div>
+    <div class="metric">
+      <div class="metric-label">عدد السجلات</div>
+      <div class="metric-val" id="m-count">0</div>
+      <div class="metric-sub">لحظة</div>
+    </div>
+  </div>
+  <div class="chart-wrap">
+    <div class="chart-header">
+      <span class="chart-title">الخط البياني</span>
+      <select class="day-select" id="day-select" onchange="renderLineChart()"></select>
+    </div>
+    <div style="position:relative;height:220px;width:100%;">
+      <canvas id="lineChart"></canvas>
+    </div>
+  </div>
+</div>
+
+<!-- WEEK SCREEN -->
+<div class="screen" id="screen-week">
+  <div class="chart-wrap">
+    <div class="chart-header">
+      <span class="chart-title">أيام الأسبوع</span>
+    </div>
+    <div style="position:relative;height:200px;width:100%;">
+      <canvas id="weekChart"></canvas>
+    </div>
+  </div>
+  <div class="section" id="week-list">
+    <div class="empty">لا توجد بيانات بعد</div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+const SHEET_URL = 'https://script.google.com/macros/s/AKfycbzY6g69f0Fn896iqqzW_c0qf4YkADHOeLbfWjmPeSiH2KzoUV_llGXs_l2jydgpLwyUGw/exec';
+
+let cachedData = [];
+let lineChartInst = null;
+let weekChartInst = null;
+
+// Init
+function init() {
+  const now = new Date();
+  const days = ['الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
+  const months = ['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
+  document.getElementById('day-title').textContent = days[now.getDay()];
+  document.getElementById('date-display').textContent = `${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}`;
+  document.getElementById('inp-time').value = now.toTimeString().slice(0,5);
+  testConnection();
+}
+
+async function testConnection() {
+  try {
+    const r = await fetch(SHEET_URL, { method: 'GET' });
+    const data = await r.json();
+    if(data.status === 'ok') setStatus('connected', 'متصل بـ Google Sheets');
+    else setStatus('error', 'تعذّر الاتصال');
+  } catch(e) {
+    setStatus('error', 'تعذّر الاتصال');
+  }
+}
+
+function setStatus(type, msg) {
+  const dot = document.getElementById('status-dot');
+  const txt = document.getElementById('status-text');
+  dot.className = 'status-dot ' + type;
+  txt.textContent = msg;
+}
+
+function onSlider(v) {
+  const el = document.getElementById('level-display');
+  el.textContent = v;
+  const colors = ['','#ff5f5f','#ff7a5f','#ff9f5f','#ffbf5f','#f5a623','#d4c44a','#9ed46a','#5dcaa5','#3dd68c','#3dd68c'];
+  el.style.color = colors[parseInt(v)] || '#6c8fff';
+  const range = document.getElementById('inp-level');
+  const pct = (v - 1) / 9 * 100;
+  range.style.background = `linear-gradient(to left, ${colors[parseInt(v)]} ${pct}%, #1c1c26 ${pct}%)`;
+}
+
+async function submitEntry() {
+  const time = document.getElementById('inp-time').value;
+  const cat = document.getElementById('inp-cat').value;
+  const act = document.getElementById('inp-act').value.trim() || cat;
+  const level = parseInt(document.getElementById('inp-level').value);
+  const day = new Date().toISOString().slice(0,10);
+
+  const btn = document.getElementById('btn-add');
+  btn.disabled = true;
+  btn.classList.add('loading');
+  btn.textContent = 'جاري الحفظ...';
+
+  try {
+    await fetch(SHEET_URL, {
+      method: 'POST',
+      mode: 'cors',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ day, time, cat, act, level })
+    });
+
+    // Add to local cache
+    cachedData.push({ day, time, cat, act, level });
+    cachedData.sort((a,b) => (a.day+a.time).localeCompare(b.day+b.time));
+
+    // Reset form
+    document.getElementById('inp-act').value = '';
+    document.getElementById('inp-level').value = 5;
+    onSlider(5);
+
+    showToast('تم الحفظ في Google Sheets ✓', 'success');
+    setStatus('connected', `آخر حفظ: ${time}`);
+
+  } catch(e) {
+    showToast('خطأ في الاتصال، حاول مجدداً', 'error');
+    setStatus('error', 'فشل الإرسال');
+  } finally {
+    btn.disabled = false;
+    btn.classList.remove('loading');
+    btn.textContent = 'حفظ في Google Sheets ←';
+  }
+}
+
+function showToast(msg, type='') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast show ' + type;
+  setTimeout(() => t.className = 'toast', 2500);
+}
+
+function switchNav(name) {
+  ['add','chart','week'].forEach(n => {
+    document.getElementById('screen-'+n).classList.toggle('active', n===name);
+    document.getElementById('nav-'+n).classList.toggle('active', n===name);
+  });
+  if(name === 'chart') { populateDaySelect(); renderLineChart(); }
+  if(name === 'week') { renderWeekChart(); }
+}
+
+function levelColor(l) {
+  const colors = ['','#ff5f5f','#ff7a5f','#ff9f5f','#ffbf5f','#f5a623','#d4c44a','#9ed46a','#5dcaa5','#3dd68c','#3dd68c'];
+  return colors[Math.round(l)] || '#6c8fff';
+}
+
+function todayKey() { return new Date().toISOString().slice(0,10); }
+
+function getUniqueDays() {
+  return [...new Set(cachedData.map(e=>e.day))].sort();
+}
+
+function populateDaySelect() {
+  const sel = document.getElementById('day-select');
+  const days = getUniqueDays();
+  if(!days.length) { sel.innerHTML = '<option>'+todayKey()+'</option>'; return; }
+  const dayNames = ['أحد','اثنين','ثلاثاء','أربعاء','خميس','جمعة','سبت'];
+  sel.innerHTML = days.map(d => {
+    const dt = new Date(d); const dn = dayNames[dt.getDay()];
+    return `<option value="${d}">${d===todayKey()?'اليوم':dn+' '+d.slice(5)}</option>`;
+  }).join('');
+  sel.value = days.includes(todayKey()) ? todayKey() : days[days.length-1];
+}
+
+function renderLineChart() {
+  const day = document.getElementById('day-select').value || todayKey();
+  const de = cachedData.filter(e=>e.day===day).sort((a,b)=>a.time.localeCompare(b.time));
+
+  // Metrics
+  if(de.length) {
+    const avg = de.reduce((s,e)=>s+e.level,0)/de.length;
+    const peak = de.reduce((mx,e)=>e.level>mx.level?e:mx, de[0]);
+    document.getElementById('m-avg').textContent = avg.toFixed(1);
+    document.getElementById('m-peak').textContent = peak.level;
+    document.getElementById('m-peak-lbl').textContent = peak.act.slice(0,10);
+    document.getElementById('m-count').textContent = de.length;
+  } else {
+    document.getElementById('m-avg').textContent = '—';
+    document.getElementById('m-peak').textContent = '—';
+    document.getElementById('m-peak-lbl').textContent = '—';
+    document.getElementById('m-count').textContent = '0';
+  }
+
+  const ctx = document.getElementById('lineChart').getContext('2d');
+  if(lineChartInst) { lineChartInst.destroy(); lineChartInst=null; }
+  if(!de.length) { ctx.clearRect(0,0,9999,9999); return; }
+
+  const grad = ctx.createLinearGradient(0,0,0,200);
+  grad.addColorStop(0,'rgba(108,143,255,0.3)');
+  grad.addColorStop(1,'rgba(108,143,255,0)');
+
+  lineChartInst = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: de.map(e=>e.time),
+      datasets: [{
+        data: de.map(e=>e.level),
+        borderColor: '#6c8fff',
+        borderWidth: 2.5,
+        backgroundColor: grad,
+        fill: true,
+        tension: 0.45,
+        pointBackgroundColor: de.map(e=>levelColor(e.level)),
+        pointBorderColor: '#0a0a0f',
+        pointBorderWidth: 2,
+        pointRadius: 7,
+        pointHoverRadius: 9
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: '#1c1c26',
+          borderColor: 'rgba(255,255,255,0.1)',
+          borderWidth: 0.5,
+          titleColor: '#888899',
+          bodyColor: '#f0f0f5',
+          padding: 10,
+          callbacks: { label: c => ' '+de[c.dataIndex].act+' — '+c.raw }
+        }
+      },
+      scales: {
+        y: { min:0, max:10, ticks:{ stepSize:2, color:'#888899', font:{size:11} }, grid:{color:'rgba(255,255,255,0.05)'}, border:{display:false} },
+        x: { ticks:{ color:'#888899', font:{size:11}, maxRotation:0 }, grid:{display:false}, border:{display:false} }
+      }
+    }
+  });
+}
+
+function renderWeekChart() {
+  const days = getUniqueDays();
+  const dayNames = ['أحد','اثنين','ثلاثاء','أربعاء','خميس','جمعة','سبت'];
+  const avgs = days.map(d => {
+    const de = cachedData.filter(e=>e.day===d);
+    if(!de.length) return 0;
+    return Math.round(de.reduce((s,e)=>s+e.level,0)/de.length*10)/10;
+  });
+  const labels = days.map(d=>{ const dt=new Date(d); return d===todayKey()?'اليوم':dayNames[dt.getDay()]; });
+
+  const ctx = document.getElementById('weekChart').getContext('2d');
+  if(weekChartInst) { weekChartInst.destroy(); weekChartInst=null; }
+
+  weekChartInst = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [{
+        data: avgs,
+        backgroundColor: days.map(d=>d===todayKey()?'#6c8fff':'rgba(108,143,255,0.25)'),
+        borderRadius: 6,
+        borderSkipped: false
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend:{display:false}, tooltip:{ backgroundColor:'#1c1c26', titleColor:'#888899', bodyColor:'#f0f0f5', callbacks:{label:c=>' متوسط '+c.raw} } },
+      scales: {
+        y: { min:0, max:10, ticks:{stepSize:2,color:'#888899',font:{size:11}}, grid:{color:'rgba(255,255,255,0.05)'}, border:{display:false} },
+        x: { ticks:{color:'#888899',font:{size:11}}, grid:{display:false}, border:{display:false} }
+      }
+    }
+  });
+
+  // Week list
+  const list = document.getElementById('week-list');
+  if(!days.length) { list.innerHTML='<div class="empty">لا توجد بيانات بعد<br>ابدأ بتسجيل أول لحظة</div>'; return; }
+  list.innerHTML = '<div class="section-title" style="margin-bottom:12px;">تفاصيل الأيام</div>' + days.map((d,i)=>{
+    const de = cachedData.filter(e=>e.day===d);
+    const col = levelColor(Math.round(avgs[i]));
+    return `<div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:0.5px solid var(--border);">
+      <div style="width:36px;height:36px;border-radius:50%;background:${col}22;color:${col};display:flex;align-items:center;justify-content:center;font-weight:600;font-size:13px;flex-shrink:0;">${avgs[i]||'—'}</div>
+      <div style="flex:1;">
+        <div style="font-size:13px;font-weight:500;">${labels[i]}</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">${de.length} سجلات</div>
+      </div>
+      <div style="font-size:11px;color:var(--muted);">${d.slice(5)}</div>
+    </div>`;
+  }).join('');
+}
+
+onSlider(5);
+init();
+</script>
+</body>
+</html>
