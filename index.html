@@ -347,6 +347,13 @@ async function submitEntry() {
 }
 
 // ── Streaks ──────────────────────────────────────────────
+function deleteHabit(name, type) {
+  if(!confirm('حذف كل سجلات "' + name + '"؟')) return;
+  cachedData = cachedData.filter(e => !(e.act === name && (e.type || 'pos') === type));
+  saveLocal();
+  renderStreaks();
+  showToast('تم الحذف ✓', 'success');
+}
 function computeStreaks() {
   const habits = {};
   cachedData.forEach(e => {
@@ -393,7 +400,8 @@ function renderStreaks() {
         <div class="habit-name">${s.name}</div>
         <div class="habit-meta">${s.type==='pos'?'أبنيها':'أكسرها'} — ${s.total} يوم إجمالي</div>
       </div>
-      <div class="habit-badge ${s.type}">${s.streak>0?s.streak+' 🔥':'0'}</div>
+      <div class="habit-badge ${s.type}" style="margin-left:8px;">${s.streak>0?s.streak+' 🔥':'0'}</div>
+      <button onclick="deleteHabit('${s.name.replace(/'/g,"\'")}','${s.type}')" style="background:transparent;border:none;color:var(--muted);font-size:16px;cursor:pointer;padding:4px 6px;font-family:'IBM Plex Sans Arabic',sans-serif;flex-shrink:0;">✕</button>
     </div>`).join('');
 }
 
