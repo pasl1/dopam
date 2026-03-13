@@ -102,6 +102,16 @@
   .empty { text-align: center; padding: 40px 20px; color: var(--muted); font-size: 13px; line-height: 1.8; }
   .screen { display: none; }
   .screen.active { display: block; }
+  .cat-item { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 0.5px solid var(--border); }
+  .cat-item:last-child { border-bottom: none; }
+  .cat-emoji { font-size: 18px; width: 28px; text-align: center; }
+  .cat-name { flex: 1; font-size: 14px; color: var(--text); }
+  .cat-del { background: transparent; border: none; color: var(--muted); font-size: 16px; cursor: pointer; padding: 4px 6px; }
+  .cat-del:hover { color: var(--red); }
+  .add-cat-row { display: flex; gap: 8px; margin-top: 14px; }
+  .add-cat-row input { flex: 1; }
+  .inp-emoji { width: 60px !important; text-align: center; font-size: 18px; }
+  .btn-add-cat { padding: 10px 16px; background: var(--accent2); border: none; border-radius: var(--radius-sm); color: #fff; font-size: 14px; font-weight: 500; cursor: pointer; font-family: 'IBM Plex Sans Arabic', sans-serif; white-space: nowrap; }
   .mascot-wrap { margin: 0 20px 14px; text-align: center; }
   .mascot-img { width: 100%; max-height: 200px; object-fit: cover; border-radius: var(--radius); border: 0.5px solid var(--border); display: none; }
   .mascot-img.loaded { display: block; }
@@ -136,6 +146,9 @@
   <button class="nav-item" onclick="switchNav('report')" id="nav-report">
     <span class="nav-icon">✦</span><span>تقرير AI</span>
   </button>
+  <button class="nav-item" onclick="switchNav('settings')" id="nav-settings">
+    <span class="nav-icon">⚙</span><span>إعدادات</span>
+  </button>
 </div>
 
 <!-- MASCOT -->
@@ -159,15 +172,7 @@
       </div>
       <div class="form-group" style="margin-bottom:0">
         <label class="form-label">التصنيف</label>
-        <select id="inp-cat">
-          <option value="طعام">طعام / شراب</option>
-          <option value="رياضة">رياضة / حركة</option>
-          <option value="تواصل">تواصل اجتماعي</option>
-          <option value="إنجاز">إنجاز / عمل</option>
-          <option value="ترفيه">ترفيه / محتوى</option>
-          <option value="طبيعة">طبيعة / هواء</option>
-          <option value="آخر">آخر</option>
-        </select>
+        <select id="inp-cat"></select>
       </div>
     </div>
     <div class="form-group">
@@ -238,6 +243,19 @@
     </div>
     <div class="ai-content muted" id="ai-content">اضغط الزر لتوليد تحليل شخصي لعاداتك ومستويات الدوبامين مع اقتراح عملي للأسبوع القادم.</div>
     <button class="btn-ai" id="btn-report" onclick="generateReport()">توليد التقرير ←</button>
+  </div>
+</div>
+
+<!-- SETTINGS -->
+<div class="screen" id="screen-settings">
+  <div class="section">
+    <div class="section-title">التصنيفات</div>
+    <div id="cats-list"></div>
+    <div class="add-cat-row">
+      <input type="text" class="inp-emoji" id="inp-emoji" placeholder="🏃" maxlength="2" />
+      <input type="text" id="inp-cat-name" placeholder="اسم التصنيف..." />
+      <button class="btn-add-cat" onclick="addCategory()">إضافة</button>
+    </div>
   </div>
 </div>
 
@@ -520,18 +538,84 @@ ${streakSummary}
 
 // ── Nav ───────────────────────────────────────────────────
 function switchNav(name) {
-  ['add','streak','chart','report'].forEach(n=>{
+  ['add','streak','chart','report','settings'].forEach(n=>{
     document.getElementById('screen-'+n).classList.toggle('active',n===name);
     document.getElementById('nav-'+n).classList.toggle('active',n===name);
   });
   if(name==='streak') renderStreaks();
   if(name==='chart'){populateDaySelect();renderLineChart();}
+  if(name==='settings') renderCategorySettings();
 }
 
 function showToast(msg,type='') {
   const t=document.getElementById('toast');
   t.textContent=msg; t.className='toast show '+type;
   setTimeout(()=>t.className='toast',2500);
+}
+
+// ── Categories ───────────────────────────────────────────
+const DEFAULT_CATS = [
+  { emoji: '🍔', name: 'طعام' },
+  { emoji: '🏃', name: 'رياضة' },
+  { emoji: '👥', name: 'تواصل' },
+  { emoji: '✅', name: 'إنجاز' },
+  { emoji: '📱', name: 'ترفيه' },
+  { emoji: '🌿', name: 'طبيعة' },
+  { emoji: '⭐', name: 'آخر' },
+];
+
+function loadCategories() {
+  try {
+    const s = localStorage.getItem('dop_cats');
+    return s ? JSON.parse(s) : [...DEFAULT_CATS];
+  } catch(e) { return [...DEFAULT_CATS]; }
+}
+
+function saveCategories(cats) {
+  localStorage.setItem('dop_cats', JSON.stringify(cats));
+}
+
+function renderCategorySelect() {
+  const cats = loadCategories();
+  const sel = document.getElementById('inp-cat');
+  sel.innerHTML = cats.map(c => `<option value="${c.name}">${c.emoji} ${c.name}</option>`).join('');
+}
+
+function renderCategorySettings() {
+  const cats = loadCategories();
+  const list = document.getElementById('cats-list');
+  if(!cats.length) { list.innerHTML = '<div class="empty">لا توجد تصنيفات</div>'; return; }
+  list.innerHTML = cats.map((c, i) => `
+    <div class="cat-item">
+      <span class="cat-emoji">${c.emoji}</span>
+      <span class="cat-name">${c.name}</span>
+      <button class="cat-del" onclick="deleteCategory(${i})">✕</button>
+    </div>`).join('');
+}
+
+function addCategory() {
+  const emoji = document.getElementById('inp-emoji').value.trim() || '⭐';
+  const name  = document.getElementById('inp-cat-name').value.trim();
+  if(!name) { showToast('اكتب اسم التصنيف', 'error'); return; }
+  const cats = loadCategories();
+  if(cats.find(c => c.name === name)) { showToast('التصنيف موجود مسبقاً', 'error'); return; }
+  cats.push({ emoji, name });
+  saveCategories(cats);
+  document.getElementById('inp-emoji').value = '';
+  document.getElementById('inp-cat-name').value = '';
+  renderCategorySelect();
+  renderCategorySettings();
+  showToast('تم إضافة التصنيف ✓', 'success');
+}
+
+function deleteCategory(i) {
+  const cats = loadCategories();
+  if(!confirm('حذف تصنيف "' + cats[i].name + '"؟')) return;
+  cats.splice(i, 1);
+  saveCategories(cats);
+  renderCategorySelect();
+  renderCategorySettings();
+  showToast('تم الحذف ✓', 'success');
 }
 
 // ── Mascot ────────────────────────────────────────────────
@@ -577,6 +661,7 @@ function removeMascot() {
 onSlider(5);
 init();
 loadMascot();
+renderCategorySelect();
 </script>
 </body>
 </html>
