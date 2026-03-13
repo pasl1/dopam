@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <meta name="theme-color" content="#0a0a0f">
-<title>تراكر الدوبامين</title>
+<title>تتبع الدوبامين</title>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -114,6 +114,7 @@
 <div class="status-bar">
   <div class="status-dot" id="status-dot"></div>
   <div class="status-text" id="status-text">جاري الاتصال...</div>
+  <button onclick="syncFromSheets()" style="background:transparent;border:0.5px solid var(--border2);border-radius:6px;color:var(--muted);font-size:11px;padding:4px 10px;cursor:pointer;font-family:'IBM Plex Sans Arabic',sans-serif;flex-shrink:0;">مزامنة</button>
 </div>
 
 <div class="bottom-nav">
@@ -227,7 +228,7 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <script>
-const SHEET_URL = 'https://script.google.com/macros/s/AKfycbzjNPxZjZrR_-nH_qIMYWaEdfIkOc6sqPk3509ZtW97TTS31oJNmQT3tMII66f7O3_oZA/exec';
+const SHEET_URL = 'https://script.google.com/macros/s/AKfycbxMOgxD9HOahERn0w9El6cgQaJV2v2hn9ibSNDg48JqtDJ11isPiOBnwrv145L0p4RgxA/exec';
 
 let cachedData = [];
 let habitType = 'pos';
@@ -241,8 +242,7 @@ function init() {
   document.getElementById('day-title').textContent = days[now.getDay()];
   document.getElementById('date-display').textContent = now.getDate()+' '+months[now.getMonth()]+' '+now.getFullYear();
   document.getElementById('inp-time').value = now.toTimeString().slice(0,5);
-  loadLocal();
-  testConnection();
+  syncFromSheets();
 }
 
 function loadLocal() {
@@ -257,6 +257,26 @@ async function testConnection() {
     await fetch(SHEET_URL, { method:'GET', mode:'no-cors' });
     setStatus('connected', 'متصل بـ Google Sheets');
   } catch(e) { setStatus('error','تعذّر الاتصال'); }
+}
+
+async function syncFromSheets() {
+  setStatus('connected', 'جاري المزامنة...');
+  try {
+    const resp = await fetch(SHEET_URL + '?action=read');
+    const data = await resp.json();
+    if(data.status === 'ok' && data.data) {
+      cachedData = data.data;
+      saveLocal();
+      setStatus('connected', 'تمت المزامنة ✓  — ' + cachedData.length + ' سجل');
+    } else {
+      // fallback to local
+      loadLocal();
+      setStatus('connected', 'بيانات محلية (' + cachedData.length + ' سجل)');
+    }
+  } catch(e) {
+    loadLocal();
+    setStatus('error', 'تعذّرت المزامنة — بيانات محلية');
+  }
 }
 
 function setStatus(t, m) {
