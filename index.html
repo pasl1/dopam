@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <meta name="theme-color" content="#0a0a0f">
-<title>تتبع الدوبامين</title>
+<title>تراكر الدوبامين</title>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -37,6 +37,7 @@
   .habit-btn { flex: 1; padding: 10px 8px; border-radius: var(--radius-sm); font-size: 13px; font-weight: 500; cursor: pointer; border: 0.5px solid var(--border2); background: var(--surface2); color: var(--muted); font-family: 'IBM Plex Sans Arabic', sans-serif; transition: all 0.18s; text-align: center; }
   .habit-btn.pos.active { background: rgba(61,214,140,0.15); border-color: var(--green); color: var(--green); }
   .habit-btn.neg.active { background: rgba(255,95,95,0.15); border-color: var(--red); color: var(--red); }
+  .habit-btn.none.active { background: rgba(136,136,153,0.15); border-color: var(--muted); color: var(--text); }
   .slider-section { margin-bottom: 14px; }
   .slider-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 10px; }
   .level-display { font-size: 28px; font-weight: 600; color: var(--accent); line-height: 1; transition: color 0.2s; }
@@ -101,6 +102,11 @@
   .empty { text-align: center; padding: 40px 20px; color: var(--muted); font-size: 13px; line-height: 1.8; }
   .screen { display: none; }
   .screen.active { display: block; }
+  .mascot-wrap { margin: 0 20px 14px; text-align: center; }
+  .mascot-img { width: 100%; max-height: 200px; object-fit: cover; border-radius: var(--radius); border: 0.5px solid var(--border); display: none; }
+  .mascot-img.loaded { display: block; }
+  .mascot-upload { width: 100%; padding: 12px; background: var(--surface2); border: 0.5px dashed var(--border2); border-radius: var(--radius); color: var(--muted); font-size: 13px; cursor: pointer; font-family: 'IBM Plex Sans Arabic', sans-serif; text-align: center; }
+  .mascot-remove { font-size: 11px; color: var(--muted); background: transparent; border: none; cursor: pointer; margin-top: 6px; font-family: 'IBM Plex Sans Arabic', sans-serif; display: none; }
 </style>
 </head>
 <body>
@@ -130,6 +136,16 @@
   <button class="nav-item" onclick="switchNav('report')" id="nav-report">
     <span class="nav-icon">✦</span><span>تقرير AI</span>
   </button>
+</div>
+
+<!-- MASCOT -->
+<div class="mascot-wrap" id="mascot-wrap">
+  <img id="mascot-img" class="mascot-img" src="" alt="mascot" />
+  <label class="mascot-upload" id="mascot-label">
+    اضغط لرفع صورة مشجعك ↑
+    <input type="file" accept="image/*" style="display:none" onchange="uploadMascot(this)" />
+  </label>
+  <button class="mascot-remove" id="mascot-remove" onclick="removeMascot()">إزالة الصورة ✕</button>
 </div>
 
 <!-- ADD -->
@@ -163,6 +179,7 @@
       <div class="habit-toggle">
         <button class="habit-btn pos active" id="btn-pos" onclick="setHabitType('pos')">أبنيها ↑</button>
         <button class="habit-btn neg" id="btn-neg" onclick="setHabitType('neg')">أكسرها ↓</button>
+        <button class="habit-btn none" id="btn-none" onclick="setHabitType('none')">لحظة فقط</button>
       </div>
     </div>
     <div class="slider-section">
@@ -288,6 +305,7 @@ function setHabitType(t) {
   habitType = t;
   document.getElementById('btn-pos').classList.toggle('active', t==='pos');
   document.getElementById('btn-neg').classList.toggle('active', t==='neg');
+  document.getElementById('btn-none').classList.toggle('active', t==='none');
 }
 
 function onSlider(v) {
@@ -508,8 +526,49 @@ function showToast(msg,type='') {
   setTimeout(()=>t.className='toast',2500);
 }
 
+// ── Mascot ────────────────────────────────────────────────
+function loadMascot() {
+  try {
+    const saved = localStorage.getItem('dop_mascot');
+    if(saved) showMascot(saved);
+  } catch(e) {}
+}
+
+function uploadMascot(input) {
+  const file = input.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    localStorage.setItem('dop_mascot', e.target.result);
+    showMascot(e.target.result);
+  };
+  reader.readAsDataURL(file);
+}
+
+function showMascot(src) {
+  const img = document.getElementById('mascot-img');
+  const label = document.getElementById('mascot-label');
+  const btn = document.getElementById('mascot-remove');
+  img.src = src;
+  img.classList.add('loaded');
+  label.style.display = 'none';
+  btn.style.display = 'block';
+}
+
+function removeMascot() {
+  localStorage.removeItem('dop_mascot');
+  const img = document.getElementById('mascot-img');
+  const label = document.getElementById('mascot-label');
+  const btn = document.getElementById('mascot-remove');
+  img.classList.remove('loaded');
+  img.src = '';
+  label.style.display = 'block';
+  btn.style.display = 'none';
+}
+
 onSlider(5);
 init();
+loadMascot();
 </script>
 </body>
 </html>
